@@ -1,0 +1,40 @@
+version: "2.4"
+
+services:
+  cakephp-frontend:
+    container_name: cakephp-frontend
+    build:
+      context: ./
+      target: cakephp
+      args:
+        XDEBUG_ENABLED: "true"
+        UID: $USERID
+        GID: $GROUPID
+        UNAME: $USERNAME
+    volumes:
+      - ./app:/var/www/
+    user: 1000:1000
+    ports:
+      - 80:80
+      - 5173:5173
+    depends_on:
+      - cakephp-database-phpmyadmin
+
+  cakephp-database:
+    container_name: cakephp-database
+    image: percona
+    environment:
+      MYSQL_USER: cakephpdb
+      MYSQL_PASSWORD: cakephpdb
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: cakephp
+
+  cakephp-database-phpmyadmin:
+    container_name: cakephp-database-phpmyadmin
+    image: phpmyadmin
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=cakephp-database
+    depends_on:
+      - cakephp-database
